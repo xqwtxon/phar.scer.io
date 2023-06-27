@@ -8,7 +8,17 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
+  workflow_dispatch:
+  
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+  
 jobs:
   production-build:
     if: "contains(github.event.head_commit.message, 'Release')"
@@ -27,6 +37,10 @@ jobs:
     - run: npm install
     - run: yarn build:production
     - run: yarn start
+    - name: Deploy to GitHub Pages
+      id: production
+      uses: actions/deploy-pages@v2
+        
   development-build:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'Release')"
@@ -44,3 +58,6 @@ jobs:
     - run: npm install
     - run: yarn build:development
     - run: yarn start
+    - name: Deploy to GitHub Pages
+      id: development
+      uses: actions/deploy-pages@v2
